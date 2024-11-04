@@ -1,95 +1,78 @@
+import styles from "./page.module.scss";
 import Image from "next/image";
-import styles from "./page.module.css";
 
-export default function Home() {
+interface NewsArticle {
+  title: string;
+  description: string;
+  author: string;
+  url: string;
+  updated_at: number;
+  news_site: string;
+  thumb_2x: string;
+}
+
+// Fetch articles from Coingecko API
+async function fetchBitcoinNews(): Promise<NewsArticle[]> {
+  const res = await fetch("https://api.coingecko.com/api/v3/news", {
+    cache: "no-store",
+  });
+  const jsonData = await res.json();
+
+  const articles = jsonData.data || [];
+
+  return articles as NewsArticle[];
+}
+
+// Function to truncate a string to a specified length
+const truncateString = (str: string, num: number): string => {
+  if (str.length > num) {
+    return str.slice(0, num) + "..."; // Add ellipsis if truncated
+  }
+  return str;
+};
+
+export default async function HomePage() {
+  const newsArticles = await fetchBitcoinNews();
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className={styles.articleContainer}>
+      <p>Your go-to source for the latest crypto news.</p>
+      <div className={styles.articles}>
+        {newsArticles.length > 0 ? (
+          newsArticles.map((article) => (
+            <div key={article.url} className={styles.articleCard}>
+              <div>
+                <h2>{article.title}</h2>
+              </div>
+              <div>
+                <div className={styles.imagePlaceholder}>
+                  {article.thumb_2x && article.thumb_2x !== "missing_large.png" ? (
+                    <Image src={article.thumb_2x} alt={article.title} width={1920} height={1080} />
+                  ) : (
+                    <div className={styles.noImage}>No picture available.</div>
+                  )}
+                </div>
+                <p>{truncateString(article.description, 300)}</p> {/* Limit to 150 characters */}
+                <h4>
+                  <strong>Author:</strong> <span>{article.author}</span>
+                </h4>
+                <h4>
+                  <strong>Source:</strong> <span>{article.news_site}</span>
+                </h4>
+                <h4>
+                  <strong>Published:</strong>{" "}
+                  <span>{new Date(article.updated_at * 1000).toLocaleDateString()}</span>
+                </h4>
+                <a href={article.url} target="_blank" rel="noopener noreferrer">
+                  Read More
+                </a>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No articles available at this time.</p>
+        )}
+      </div>
     </div>
   );
 }
