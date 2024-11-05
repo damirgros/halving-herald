@@ -61,7 +61,7 @@ export default async function HomePage() {
                     <div className={styles.noImage}>No picture available.</div>
                   )}
                 </div>
-                <p>{truncateString(article.description, 300)}</p> {/* Limit to 150 characters */}
+                <p>{truncateString(article.description, 300)}</p> {/* Limit to 300 characters */}
                 <h4>
                   <strong>Author:</strong> <span>{article.author}</span>
                 </h4>
