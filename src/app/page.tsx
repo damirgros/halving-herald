@@ -11,7 +11,7 @@ interface NewsArticle {
   thumb_2x: string;
 }
 
-// Fetch articles from Coingecko API
+// Fetch articles from CoinGecko API
 async function fetchBitcoinNews(): Promise<NewsArticle[]> {
   const res = await fetch("https://api.coingecko.com/api/v3/news", {
     cache: "no-store",
@@ -20,7 +20,16 @@ async function fetchBitcoinNews(): Promise<NewsArticle[]> {
 
   const articles = jsonData.data || [];
 
-  return articles as NewsArticle[];
+  const bitcoinNews = articles.filter((article: NewsArticle) => {
+    return (
+      article.title.includes("Bitcoin") ||
+      article.title.includes("btc") ||
+      article.description.includes("Bitcoin") ||
+      article.description.includes("btc")
+    );
+  });
+
+  return bitcoinNews as NewsArticle[];
 }
 
 // Function to truncate a string to a specified length
@@ -36,7 +45,7 @@ export default async function HomePage() {
 
   return (
     <div className={styles.articleContainer}>
-      <p>Your go-to source for the latest crypto news.</p>
+      <p>Your go-to source for the latest Bitcoin news.</p>
       <div className={styles.articles}>
         {newsArticles.length > 0 ? (
           newsArticles.map((article) => (
