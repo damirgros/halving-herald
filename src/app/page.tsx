@@ -4,38 +4,31 @@ import Image from "next/image";
 interface NewsArticle {
   title: string;
   description: string;
-  author: string;
-  url: string;
-  updated_at: number;
-  news_site: string;
-  thumb_2x: string;
+  creator: string;
+  link: string;
+  pubDate: number;
+  source_name: string;
+  source_icon: string;
 }
 
-// Fetch articles from CoinGecko API
+const apikey = process.env.API_KEY
+
+// Fetch articles from NewsData API
 async function fetchBitcoinNews(): Promise<NewsArticle[]> {
-  const res = await fetch("https://api.coingecko.com/api/v3/news", {
+  const res = await fetch(`https://newsdata.io/api/1/news?apikey=${apikey}&q=bitcoin`, {
     cache: "no-store",
   });
   const jsonData = await res.json();
 
   const articles = jsonData.data || [];
 
-  const bitcoinNews = articles.filter((article: NewsArticle) => {
-    return (
-      article.title.includes("Bitcoin") ||
-      article.title.includes("btc") ||
-      article.description.includes("Bitcoin") ||
-      article.description.includes("btc")
-    );
-  });
-
-  return bitcoinNews as NewsArticle[];
+  return articles as NewsArticle[];
 }
 
 // Function to truncate a string to a specified length
 const truncateString = (str: string, num: number): string => {
   if (str.length > num) {
-    return str.slice(0, num) + "..."; // Add ellipsis if truncated
+    return str.slice(0, num) + "..."; 
   }
   return str;
 };
@@ -49,30 +42,30 @@ export default async function HomePage() {
       <div className={styles.articles}>
         {newsArticles.length > 0 ? (
           newsArticles.map((article) => (
-            <div key={article.url} className={styles.articleCard}>
+            <div key={article.link} className={styles.articleCard}>
               <div>
                 <h2>{article.title}</h2>
               </div>
               <div>
                 <div className={styles.imagePlaceholder}>
-                  {article.thumb_2x && article.thumb_2x !== "missing_large.png" ? (
-                    <Image src={article.thumb_2x} alt={article.title} width={1920} height={1080} />
+                  {article.source_icon && article.source_icon !== "missing_large.png" ? (
+                    <Image src={article.source_icon} alt={article.title} width={1920} height={1080} />
                   ) : (
                     <div className={styles.noImage}>No picture available.</div>
                   )}
                 </div>
-                <p>{truncateString(article.description, 300)}</p> {/* Limit to 300 characters */}
+                <p>{truncateString(article.description, 300)}</p>
                 <h4>
-                  <strong>Author:</strong> <span>{article.author}</span>
+                  <strong>Author:</strong> <span>{article.creator}</span>
                 </h4>
                 <h4>
-                  <strong>Source:</strong> <span>{article.news_site}</span>
+                  <strong>Source:</strong> <span>{article.source_name}</span>
                 </h4>
                 <h4>
                   <strong>Published:</strong>{" "}
-                  <span>{new Date(article.updated_at * 1000).toLocaleDateString()}</span>
+                  <span>{new Date(article.pubDate * 1000).toLocaleDateString()}</span>
                 </h4>
-                <a href={article.url} target="_blank" rel="noopener noreferrer">
+                <a href={article.link} target="_blank" rel="noopener noreferrer">
                   Read More
                 </a>
               </div>
