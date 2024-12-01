@@ -34,7 +34,7 @@ async function fetchBitcoinNews(): Promise<NewsArticle[]> {
   const jsonData = await res.json();
 
   // Process articles to map to NewsArticle interface
-  const articles = jsonData.results.map((article: any) => ({
+  const articles = jsonData.results.map((article: NewsArticle) => ({
     title: article.title || "No Title Available",
     description: article.description || "No Description Available",
     creator: article.creator || "Unknown",
